@@ -2,6 +2,7 @@
 
 # -----------------------------------
 # Yosild - Your simple Linux distro
+# (c) Jaromaz https://jm.iq.pl
 # -----------------------------------
 
 
@@ -11,7 +12,7 @@ distro_name="Yosild"
 distro_desc="Your simple Linux distro"
 distro_version="1.0"
 device="sdb"
-swap_size=20 # MB
+swap_size=0 # MB
 telnetd="false"
 kernel="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.20.tar.xz"
 # Minimum required BusyBox version is 1.28
