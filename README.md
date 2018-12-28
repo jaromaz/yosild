@@ -4,9 +4,9 @@ Yosild is a shell script that builds a full, minimal Linux distribution, based o
 
 It creates probably the simplest, complete version of Linux (in this case not GNU), which makes it easier to understand, how to build the system from scratch. It is much easier to build than other, previously available solutions: Aboriginal, mkroot, Buildroot or Linux From Scratch.
 
-The script should be run on the latest Debian version with the architecture compatible with the target device - just a network install from a minimal CD (netinst).
+The script should be run on the latest Debian version with the architecture compatible with the target device - just a network install from a minimal CD ([netinst][1]).
 
-Yosild:
+**Yosild**:
 
 * downloads and installs all the libraries and packages required to compile,
 * downloads and compiles the kernel with default options,
@@ -21,3 +21,7 @@ Mini-distribution by default supports standard entries in /etc/network/interface
 
 The script cooperates with VirtualBox - you can create an additional hard disk and install Yosild on it, and then connect this virtual disk to a new virtual machine.
 
+[More info][2]
+
+[1]: https://www.debian.org/CD/netinst/
+[2]: https://jm.iq.pl/yosild-my-your-linux-distribution/
