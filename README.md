@@ -21,7 +21,9 @@ Mini-distribution by default supports standard entries in /etc/network/interface
 
 The script cooperates with VirtualBox - you can create an additional hard disk and install Yosild on it, and then connect this virtual disk to a new virtual machine.
 
-[More info][2]
+Yosild is licensed under GNU General Public License v3.0
+
+More information: [https://jm.iq.pl][2]
 
 [1]: https://www.debian.org/CD/netinst/
 [2]: https://jm.iq.pl/yosild-my-your-linux-distribution/

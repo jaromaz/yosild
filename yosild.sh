@@ -3,10 +3,13 @@
 # -----------------------------------
 # Yosild - Your simple Linux distro
 # (c) Jaromaz https://jm.iq.pl
+#
+# Yosild is licensed under
+# GNU General Public License v3.0
 # -----------------------------------
 
 
-# ----- Configuration ---------------
+# ----- Config ----------------------
 
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
