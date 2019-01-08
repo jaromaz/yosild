@@ -1,6 +1,6 @@
 # Yosild - Your simple Linux distro
 
-Yosild is a shell script that builds a full, minimal Linux distribution, based on BusyBox. I wrote it with the assumption of compiling any version of kernel on any hardware platform, so that this script can prepare minimalistic Linux for devices with little hardware resources.
+Yosild is a single shell script that builds a full, minimal Linux distribution, based on BusyBox. I wrote it with the assumption of compiling any version of kernel on any hardware platform, so that this script can prepare minimalistic Linux for devices with little hardware resources.
 
 It creates probably the simplest, complete version of Linux, which makes it easier to understand, how to build the system from scratch. It is much easier to build than other, previously available solutions: Aboriginal, mkroot, Buildroot or Linux From Scratch.
 

@@ -3,14 +3,11 @@
 # -----------------------------------
 # Yosild - Your simple Linux distro
 # (c) Jaromaz https://jm.iq.pl
-#
 # Yosild is licensed under
 # GNU General Public License v3.0
 # -----------------------------------
 
-
 # ----- Config ----------------------
-
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
 distro_version="1.0"
@@ -20,48 +17,40 @@ telnetd="false"
 kernel="https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.20.tar.xz"
 # Minimum required BusyBox version is 1.28
 busybox="https://busybox.net/downloads/binaries/1.28.1-defconfig-multiarch/busybox-i686"
-
 # -----------------------------------
 
 
-
-clear
 if [ $(id -u) -ne 0 ]; then
   echo "Run as root"; exit 1
 fi
 
-printf "\n** $distro_name - creating distribution\n\n"
-printf "** Are you sure that you want to delete all data from your /dev/$device drive? (y/n): "
-read ans
-[ $ans != 'n' ] || exit 1
-
-
+clear && printf "\n** $distro_name - creating distribution\n\n"
+printf "** Are you sure that you want to delete all data from /dev/$device drive? (y/n): "
+read answer
+[ $answer != "y" ] && exit 1
 if [ $( mountpoint -qd /mnt ) ]; then
   printf "** Can I umount /mnt? (y/n): "
-  read ans
-  [ $ans != 'n' ] || exit 1
+  read answer
+  [ $answer != "y" ] && exit 1
   umount /mnt
 fi
 
-
 # installation of the BusyBox
 [ -d ./files ] || mkdir files
-busans=n
+answer="n"
 if [ -f files/busybox ] ; then
   printf "** Do you want to use a BusyBox downloaded earlier? (y/n): "
-  read busans
+  read answer
 fi
-if [ $busans != 'y' ] ; then
-  echo "** Busybox installation"
+if [ $answer != "y" ] ; then
+  echo "** BusyBox installation"
+  [ $(apt-cache policy ca-certificates | grep none | wc -m) -gt 0 ] && apt update && apt install -y ca-certificates
   rm files/busybox > /dev/null 2>&1
   wget $busybox -O files/busybox
   chmod +x files/busybox
 fi
 
-
-echo "** Partitioning /dev/$device"
-sleep 5
-dir=$(pwd)
+echo "** Partitioning /dev/$device" && sleep 5
 part=1
 swap_uuid=0
 wipefs -af /dev/$device > /dev/null 2>&1
@@ -75,28 +64,24 @@ if [ $swap_size -gt 0 ] ; then
 fi
 echo "** Preparation of the system partition"
 printf "n\np\n${part}\n\n\nw\n" | ./files/busybox fdisk /dev/$device > /dev/null 2>&1
-printf "Y\n" | mkfs.ext4 /dev/${device}${part}
-
+echo "Y" | mkfs.ext4 /dev/${device}${part}
 uuid=$(blkid /dev/${device}${part} -sUUID -ovalue)
 mount /dev/${device}${part} /mnt
 mkdir /mnt/boot
 host=$(printf $(printf $distro_name | tr A-Z a-z) | cut -d" " -f 1)
 
-
-
 echo "** Compilation of the kernel"
 arch=$(uname -m)
-[ $arch != 'i686' ] || arch="i386"
-kerans=n
+[ $arch = 'i686' ] && arch="i386"
+answer="n"
 if [ -f files/linux/arch/$arch/boot/bzImage ] ; then
   printf "** Do You want to use a kernel compiled earlier? (y/n): "
-  read kerans
+  read answer
 fi
-
-if [ $kerans != 'y' ] ; then
+if [ $answer != "y" ] ; then
   apt update && apt install -y build-essential libncurses5 libncurses5-dev \
-	bison flex libelf-dev chrpath gawk texinfo libsdl1.2-dev whiptail \
-	diffstat cpio libssl-dev bc
+      bison flex libelf-dev chrpath gawk texinfo libsdl1.2-dev whiptail \
+      diffstat cpio libssl-dev bc
   cd files
   rm -r linux* > /dev/null 2>&1
   wget $kernel 
@@ -108,11 +93,9 @@ if [ $kerans != 'y' ] ; then
   make
   cd ../../
 fi
-
 kernel_release=$(cat files/linux/include/config/kernel.release)
 kernel_file=vmlinuz-$kernel_release-$arch
 initrd_file=initrd.img-$kernel_release-$arch
-
 cp files/linux/arch/$arch/boot/bzImage /mnt/boot/$kernel_file
 
 echo "** Installation of GRUB"
@@ -130,21 +113,18 @@ echo Loading Linux
 mkdir rootfs
 cd rootfs
 mkdir -p bin dev lib lib64 run mnt/root proc sbin sys usr/bin \
-	 usr/sbin tmp home var/log usr/share/udhcpc usr/local/bin \
-	 var/spool/cron/crontabs etc/init.d etc/rc.d var/run \
-	 var/www/html etc/network/if-down.d etc/network/if-post-down.d \
-	 etc/network/if-pre-up.d etc/network/if-up.d run \
-	 etc/cron/daily etc/cron/hourly etc/cron/monthly etc/cron/weekly
-
+         usr/sbin tmp home var/log usr/share/udhcpc usr/local/bin \
+         var/spool/cron/crontabs etc/init.d etc/rc.d var/run \
+         var/www/html etc/network/if-down.d etc/network/if-post-down.d \
+         etc/network/if-pre-up.d etc/network/if-up.d run \
+         etc/cron/daily etc/cron/hourly etc/cron/monthly etc/cron/weekly
 
 # installation of the BusyBox
 cp ../files/busybox bin
-chmod 4755 bin/busybox
 install -d -m 0750 root
 install -d -m 1777 tmp
 
-
-echo "** Initial configuration"
+echo "** System configuration"
 mknod dev/console c 5 1
 mknod dev/tty c 5 0
 printf $host > etc/hostname
@@ -156,12 +136,8 @@ echo "127.0.0.1	 localhost $host" > etc/hosts
 echo "<html><h1>It Works!!</h1></html>" > var/www/html/index.html
 echo "UUID=$uuid  /  ext4  defaults,errors=remount-ro  0  1" > etc/fstab
 [ $swap_size -gt 0 ] && echo "UUID=$swap_uuid  none  swap  sw  0  0" >> etc/fstab
-chmod 640 etc/shadow
-touch var/log/lastlog
-touch proc/mounts
-touch var/log/wtmp
 
-# path and aliases
+# path, prompt and aliases
 cat << EOF > etc/profile
 uname -snrvm
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin
@@ -174,20 +150,16 @@ alias whereis=which
 alias logout=exit
 EOF
 
-
 # banner
 printf "\n$distro_name Linux $distro_version - $distro_desc\n\n" | tee -a etc/issue usr/share/infoban >/dev/null
-
 cat << EOF >> etc/issue
- * Default root password:	 Yosild
- * Networking:			 /etc/network/interfaces
- * Init script links installer:	 add-rc.d
- * To disable this message: 	 disban
+ * Default root password:        Yosild
+ * Networking:                   ifupdown
+ * Init scripts installer:       add-rc.d
+ * To disable this message:      disban
 
 EOF
 echo "cp /usr/share/infoban /etc/issue" > sbin/disban
-chmod +x sbin/disban
-
 
 # legal
 cat << EOF > etc/motd
@@ -198,7 +170,6 @@ individual files in /usr/share/doc/*/copyright.
 $distro_name Linux comes with ABSOLUTELY NO WARRANTY, to the extent
 permitted by applicable law.
 EOF
-
 
 # inittab
 cat << EOF > etc/inittab
@@ -216,17 +187,13 @@ tty4::askfirst:/sbin/getty 38400 tty4
 ::shutdown:/bin/umount -a -r
 EOF
 
-
 # networking
 cat << EOF > etc/network/interfaces
 auto lo
 iface lo inet loopback
-
 auto eth0
 iface eth0 inet dhcp
 EOF
-
-
 
 # init
 cat << EOF > init
@@ -262,64 +229,22 @@ mount -t devpts none /mnt/root/dev/pts
 rm -r /bin /etc /sbin /usr
 exec /mnt/root/bin/busybox chroot /mnt/root /sbin/init
 EOF
-chmod +x init
-
-
 
 # nologin
 printf "#!/bin/sh
-echo This account is currently not available.
+echo 'This account is currently not available.'
 sleep 3
 exit 1" > usr/sbin/nologin
-chmod +x usr/sbin/nologin
-
-
 
 # halt
-printf "#!/bin/sh
-if [ \$1 ] && [ \$1=='-p' ] ; then 
+cat << EOF > sbin/halt
+#!/bin/sh
+if [ \$1 ] && [ \$1 = '-p' ] ; then
     /bin/busybox poweroff
     return 0
 fi
-/bin/busybox halt -f" > sbin/halt
-chmod +x sbin/halt
-
-
-# DHCP client script
-cat << EOF | base64 -d | gzip -d > usr/share/udhcpc/default.script
-H4sICOcUYlsAA2RoY3Auc2gAzVZNT9tAED17f8VgLEhAxEmP0ESilF7aggSol4ZGm/U4XmHvml07
-gZb+944/kloxH6HtoRvFSXZn3sy8N2Nne8ufSuXbiG1DHkQiFWCFkWkGGMgMA5jew5VM4ELeoIG3
-xVeeVb9sT5vZiH2Fg+/gegMXrmFnB1BEGtxTY7Q5BBvpPCYMBMHjmNBCo5M6jlta38kMBuzi9PL8
-05fJyfnZh6HrYyZ8g1bH857QKnSLEIpCTI3mgeA2q0O9uzg/fn9yfHk1dFdH0LBa+tl8qnDpdHZ6
-9fn48uPQpa2E2xtYHhMBBrPcKOiDDMFonYG0kOhcFTxoBRzIbqHNDYQyRntvM0xYYTeRdqJC2+nC
-D+bMDKZwcIuw+80PcO4XBr29cYcMxg82mRYfSqTjB6EDPu5Cb28X/NRo4ZehLPvJIj7HCckykemw
-zygZKuQOSqFkCtdHkEWoGEDTbsBCyahsrLSQijkBFvTJWZc5DoFsQSNXWIE8vsqgXiMAHOAtDBrB
-n1/kwIPAQBjnNgLiATxJPJqQC9zEOZbqBixma66Qp096Y2xfhvZtyWJYMdNE7vfK15MIRK/jlJej
-I8YcgwoXD1OSLOi2fP6UvSVrdFkvPNY0QrSR+l7Vtqvub6E9S8TTBBB2AxW8elJaSMRB1VD1eBmd
-E0QxXnV1zuvb7W+JW1+LiCa0oLNMjriM6R3yPM7gzagcS5XHMWUV6I0xl+twY49Aq5c7cqO2Xa6q
-rnZRs8Wyf9f75n8rt5ygao6cBDMjBd3iih1tQNJtC+p+2izZf9Uvq06pJq8idS45MQlVluB1OtW3
-/f1ue+LX16tUbYcmPSnympSPJdLUd0PuS5lqCcqnNU3xCLzGM5gO6tkOdMKlaj7aLXIjIqhPYNTy
-/C1koGylolMHogqlmkGx78nVruIJWjRz0pxqbgPW+dJdFy0XrPzL0Ge/AHxZ2lW5CAAA
+/bin/busybox halt
 EOF
-chmod +x usr/share/udhcpc/default.script
-
-
-
-# startup scripts functions
-cat << EOF | base64 -d | gzip -d > etc/init.d/init-functions
-H4sICLhJlFsAA2luaXQtZnVuY3Rpb25zAJVTXW/aMBR99684eBYiSCR0j0MFoZVNaOVjC3tCfcgS
-A9aiJLJNhVT63+fYVpIyTeruk30/zzm+/tCLfokiUidCRCE0BgFeCNFcaYwOYA/zxWqzxvUKfjHR
-MSFpojgou6MQBQGUTqQOzAHg6akEjWuHKI6mdhF/DsOQ2iAgDtiDPW6+4gkT6BMvfADNGLad/5iv
-YnycTqPnREZ5eYxsRd+n8lzxf1b1p1HGn6PinOdNwUG00FgPU5O8fPiyfFxY92RiGZTVWwJlVf1N
-wMGPd5vtLX7n9CjIDcy9ldEPNZX9Pn4LA5AN0kQ3gaALnnSAW4SSW5WvkudlkjmslI2phd69maS2
-atglxdbz1QL2hVUqRaVxVsmRfwIb48V1r5td/ahXx1lyfZYF7ghXSUqIv7IZIa/EXFO/LVaaUYaI
-6zSSaZg5nvu6+f09qPXXs8PMhL9RPDn98E5zgpQSF8PAKJcrjGQ7LQrMe2Tle5rU1taxi1Xwf1Bk
-ZcHfSmMeqoYmamht69lsaEGRegN69Q5QJqjTJS0L80HOro//TsJ/p9qGoToFDdwBaSFomVQYYbne
-4fvP5Q67eLfthBXXnSVwFoKJ5tp2tRvixwWddCZuO/hMuwGWvco5rwzxNOeJJI0OZiP+APXWo0BM
-BAAA
-EOF
-
-
 
 # mini man pages
 cat << EOF > sbin/man
@@ -334,19 +259,12 @@ then
 fi
 echo "No manual entry for \$1"
 EOF
-chmod +x sbin/man
-
 
 # rcS & rcK
-cat << EOF > etc/init.d/rcS
-#!/bin/sh
+printf "#!/bin/sh
 . /etc/init.d/init-functions
-rc
-EOF
-chmod +x etc/init.d/rcS
+rc" > etc/init.d/rcS
 ln -s /etc/init.d/rcS etc/init.d/rcK
-
-
 
 # default crontabs
 cat << EOF > var/spool/cron/crontabs/root
@@ -355,9 +273,6 @@ cat << EOF > var/spool/cron/crontabs/root
 47  6 * * 0   cd / && run-parts /etc/cron/weekly
 33  5 1 * *   cd / && run-parts /etc/cron/monthly
 EOF
-chmod 600 var/spool/cron/crontabs/root
-
-
 
 # logrotate
 cat << EOF > etc/cron/daily/logrotate
@@ -374,23 +289,20 @@ for log in messages lastlog; do
   fi
 done
 EOF
-chmod +x etc/cron/daily/logrotate
 
-
-# init script links installer
+# init scripts installer
 cat << EOF > usr/bin/add-rc.d
 #!/bin/sh
 if [ -f /etc/init.d/\$1 ] && [ "\$2" -gt 0 ] ; then 
 ln -s /etc/init.d/\$1 /etc/rc.d/\$2\$1
 echo "added \$1 to init."
 else
-clear
-printf "\\n\\n * $distro_name add-rc.d ussage:
+echo "
+  ** $distro_name add-rc.d ussage:
 
   add-rc.d [init.d script name] [order number]
 
   examples:
-
   add-rc.d httpd 40
   add-rc.d ftpd 40
   add-rc.d telnetd 50
@@ -398,8 +310,6 @@ printf "\\n\\n * $distro_name add-rc.d ussage:
 "
 fi
 EOF
-chmod +x usr/bin/add-rc.d
-
 
 # start-up scripts
 initdata="
@@ -408,8 +318,7 @@ telnetd|telnet daemon|80|/usr/sbin/telnetd|-p 23
 cron|cron daemon|20|/usr/sbin/crond
 syslogd|syslog|10|/sbin/syslogd
 httpd|http server||/usr/sbin/httpd|-vvv -f -u service -h /var/www/html||httpd.log
-ftpd|ftp daemon||/usr/bin/tcpsvd|-u service -vE 0.0.0.0 21 ftpd -S /var/www/html/
-"
+ftpd|ftp daemon||/usr/bin/tcpsvd|-u service -vE 0.0.0.0 21 ftpd -S /var/www/html/"
 
 OIFS=$IFS
 IFS='
@@ -419,7 +328,6 @@ IFS='|'
 set -- $i
 cat << EOF > etc/init.d/$1
 #!/bin/sh
-
 NAME="$1"
 DESC="$2"
 DAEMON="$4"
@@ -431,19 +339,59 @@ PIDFILE=/var/run/$1.pid
 . /etc/init.d/init-functions
 init \$@
 EOF
-chmod +x etc/init.d/$1
-
+chmod 744 etc/init.d/$1
 [ $1 = 'telnetd' ] && [ "$telnetd" = false ] && continue;
 [ "$3" ] && ln -s ../init.d/$1 etc/rc.d/$3$1.sh
 done
 
+# scripts compressed and base64 encoded due to their large size ------------
+
+# BusyBox DHCP client script
+cat << EOF | base64 -d | gzip -d > usr/share/udhcpc/default.script
+H4sICOcUYlsAA2RoY3Auc2gAzVZNT9tAED17f8VgLEhAxEmP0ESilF7aggSol4ZGm/U4XmHvml07
+gZb+944/kloxH6HtoRvFSXZn3sy8N2Nne8ufSuXbiG1DHkQiFWCFkWkGGMgMA5jew5VM4ELeoIG3
+xVeeVb9sT5vZiH2Fg+/gegMXrmFnB1BEGtxTY7Q5BBvpPCYMBMHjmNBCo5M6jlta38kMBuzi9PL8
+05fJyfnZh6HrYyZ8g1bH857QKnSLEIpCTI3mgeA2q0O9uzg/fn9yfHk1dFdH0LBa+tl8qnDpdHZ6
+9fn48uPQpa2E2xtYHhMBBrPcKOiDDMFonYG0kOhcFTxoBRzIbqHNDYQyRntvM0xYYTeRdqJC2+nC
+D+bMDKZwcIuw+80PcO4XBr29cYcMxg82mRYfSqTjB6EDPu5Cb28X/NRo4ZehLPvJIj7HCckykemw
+zygZKuQOSqFkCtdHkEWoGEDTbsBCyahsrLSQijkBFvTJWZc5DoFsQSNXWIE8vsqgXiMAHOAtDBrB
+n1/kwIPAQBjnNgLiATxJPJqQC9zEOZbqBixma66Qp096Y2xfhvZtyWJYMdNE7vfK15MIRK/jlJej
+I8YcgwoXD1OSLOi2fP6UvSVrdFkvPNY0QrSR+l7Vtqvub6E9S8TTBBB2AxW8elJaSMRB1VD1eBmd
+E0QxXnV1zuvb7W+JW1+LiCa0oLNMjriM6R3yPM7gzagcS5XHMWUV6I0xl+twY49Aq5c7cqO2Xa6q
+rnZRs8Wyf9f75n8rt5ygao6cBDMjBd3iih1tQNJtC+p+2izZf9Uvq06pJq8idS45MQlVluB1OtW3
+/f1ue+LX16tUbYcmPSnympSPJdLUd0PuS5lqCcqnNU3xCLzGM5gO6tkOdMKlaj7aLXIjIqhPYNTy
+/C1koGylolMHogqlmkGx78nVruIJWjRz0pxqbgPW+dJdFy0XrPzL0Ge/AHxZ2lW5CAAA
+EOF
+
+# startup scripts functions
+cat << EOF | base64 -d | gzip -d > etc/init.d/init-functions
+H4sICMdmNFwAA2luaXQtZnVuY3Rpb25zAHVSXW/aMBR99684eBYiSMR0j0UFoZVNaOVjDXtCfcgS
+A9aiJLJNhVT63+fYWZIyzU/2/Tj3nHP9qcd/yZzrEyEylwaDAG/ECG0wOoA9zherzRrXK8TFJsck
+ibUAZXcUMieANrEygb0AIjkVoFEVkPnRti6iL2EYUpcE5AF7sKfNN7xgAnMSeZ1AM4Vt58/zVYTP
+0yl/jRXPiiN3Hf26VGRa/LerP+WpeOX5OcuahoNsqbEeprZ4+fh1+bRw4cnEKSjKjwKKsvxXgKcf
+7TbbW/4+WLMgNzT3zsV6qO3s9/FbWoJskMSmSQRd8qRD3DFUwrl8VSIr4tRzpWxMHfXuyxa1XcOu
+KLaerxZw+9WJkqXBWcdHcQ82xptHr8Cu9ah3r1kJc1Y57ojQcULqF5uRd0JU4j+Ks2WUgguTcJWE
+qde4r4AfHkBdvJobpjb9neKl492hULhYVtaNTGOkWhQeWI/Totl1m2CXVnZa5OIjUWtbBSor0LZn
+Nhv+hdujV22EMkk906TI7Xc9e5z6c8v6c1dnGOpT0PAYNDfAqLjECMv1Dj9+LnfYRbttJ62F6azE
+nxBMNs8W1e2rHhd0ypm8Ragr3T6cep0JUVrhSSZiRRof7Ib+AOWFyVTYAwAA
+EOF
+
+# permissions
+touch proc/mounts var/log/wtmp var/log/lastlog
+chmod 640  etc/shadow etc/inittab
+chmod 664  var/log/lastlog var/log/wtmp
+chmod 4755 bin/busybox
+chmod 600  var/spool/cron/crontabs/root
+chmod 755  usr/sbin/nologin sbin/disban init sbin/man etc/init.d/rcS\
+           etc/cron/daily/logrotate usr/bin/add-rc.d sbin/halt\
+           usr/share/udhcpc/default.script 
+chmod 644  etc/passwd etc/group etc/hostname etc/shells etc/hosts etc/fstab\
+           etc/issue etc/motd etc/network/interfaces etc/profile
 
 echo "** Building initramfs"
 find . | cpio -H newc -o 2> /dev/null | gzip > /mnt/boot/$initrd_file
 cd ..
 chmod 400 /mnt/boot/$initrd_file
 rm -r rootfs
-umount /mnt 
-
-printf "\n\n** done **\n\n"
-
+umount /mnt
+printf "\n** all done **\n\n"
