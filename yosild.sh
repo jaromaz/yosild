@@ -10,7 +10,7 @@
 # ----- Config ----------------------
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
-distro_version="1.0"
+distro_version="1.2"
 device="sdb"
 swap_size=0 # MB
 telnetd="false"
