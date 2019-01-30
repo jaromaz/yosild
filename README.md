@@ -23,7 +23,7 @@ The script cooperates with VirtualBox - you can create an additional hard disk a
 
 Yosild is licensed under GNU General Public License v3.0
 
-More information: [https://jm.iq.pl][2]
+For more information please visit my website: [https://jm.iq.pl][2]
 
 [1]: https://www.debian.org/CD/netinst/
 [2]: https://jm.iq.pl/yosild-my-your-linux-distribution/
