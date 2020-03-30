@@ -10,11 +10,11 @@
 # ----- Config ----------------------
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
-distro_version="1.3"
+distro_version="1.4"
 device="sdb"
 swap_size=0 # MB
 telnetd="false"
-kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.4.tar.xz"
+kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.6.tar.xz"
 # Minimum required BusyBox version is 1.28
 busybox="https://busybox.net/downloads/binaries/1.28.1-defconfig-multiarch/busybox-i686"
 # -----------------------------------
@@ -203,7 +203,6 @@ export PATH=/bin:/sbin:/usr/bin:/usr/sbin
 mountpoint -q proc || mount -t proc proc proc
 mountpoint -q sys || mount -t sysfs sys sys
 mknod /dev/null c 1 3
-echo /sbin/mdev > /proc/sys/kernel/hotplug
 if ! mountpoint -q dev
 then
   mount -t tmpfs -o size=64k,mode=0755 tmpfs dev
