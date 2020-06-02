@@ -10,11 +10,11 @@
 # ----- Config ----------------------
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
-distro_version="1.4"
+distro_version="1.5"
 device="sdb"
 swap_size=0 # MB
 telnetd="false"
-kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.6.tar.xz"
+kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.7.tar.xz"
 # Minimum required BusyBox version is 1.28
 busybox="https://busybox.net/downloads/binaries/1.28.1-defconfig-multiarch/busybox-i686"
 # -----------------------------------
@@ -44,7 +44,7 @@ if [ -f files/busybox ] ; then
 fi
 if [ $answer != "y" ] ; then
   echo "** BusyBox installation"
-  [ $(apt-cache policy ca-certificates | grep none | wc -m) -gt 0 ] && apt update && apt install -y ca-certificates
+  apt update && apt install -y ca-certificates wget
   rm files/busybox > /dev/null 2>&1
   wget $busybox -O files/busybox
   chmod +x files/busybox
@@ -79,7 +79,7 @@ if [ -f files/linux/arch/$arch/boot/bzImage ] ; then
   read answer
 fi
 if [ $answer != "y" ] ; then
-  apt update && apt install -y build-essential libncurses5 libncurses5-dev \
+  apt install -y build-essential libncurses5 libncurses5-dev \
       bison flex libelf-dev chrpath gawk texinfo libsdl1.2-dev whiptail \
       diffstat cpio libssl-dev bc
   cd files
