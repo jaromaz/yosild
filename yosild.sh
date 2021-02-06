@@ -14,7 +14,7 @@ distro_version="1.5"
 device="sdb"
 swap_size=0 # MB
 telnetd="false"
-kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.7.tar.xz"
+kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.10.13.tar.xz"
 # Minimum required BusyBox version is 1.28
 busybox="https://busybox.net/downloads/binaries/1.28.1-defconfig-multiarch/busybox-i686"
 # -----------------------------------
