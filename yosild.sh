@@ -209,6 +209,7 @@ then
   mount -t tmpfs -o mode=1777 tmpfs tmp
   mkdir -p dev/pts
   mdev -s
+  chown -R service:service /var/www
 fi
 echo 0 > /proc/sys/kernel/printk
 sleep 1
@@ -317,7 +318,7 @@ telnetd|telnet daemon|80|/usr/sbin/telnetd|-p 23
 cron|cron daemon|20|/usr/sbin/crond
 syslogd|syslog|10|/sbin/syslogd
 httpd|http server||/usr/sbin/httpd|-vvv -f -u service -h /var/www/html||httpd.log
-ftpd|ftp daemon||/usr/bin/tcpsvd|-u service -vE 0.0.0.0 21 ftpd -S /var/www/html/"
+ftpd|ftp daemon||/usr/bin/tcpsvd|-vE 0.0.0.0 21 ftpd -S -a service -w /var/www/html"
 
 OIFS=$IFS
 IFS='
