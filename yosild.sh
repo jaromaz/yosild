@@ -8,17 +8,15 @@
 # -----------------------------------
 
 # ----- Config ----------------------
+device="vdb"
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
-distro_version="1.5"
-device="sdb"
-swap_size=0 # MB
-telnetd="false"
-kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.10.13.tar.xz"
-# Minimum required BusyBox version is 1.28
-busybox="https://busybox.net/downloads/binaries/1.28.1-defconfig-multiarch/busybox-i686"
+distro_version="3.1"
+distro_codename="chinchilla"
+telnetd="true"
+kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.14.15.tar.xz"
+busybox="https://busybox.net/downloads/busybox-1.34.1.tar.bz2"
 # -----------------------------------
-
 
 if [ $(id -u) -ne 0 ]; then
   echo "Run as root"; exit 1
@@ -38,34 +36,48 @@ fi
 # installation of the BusyBox
 [ -d ./files ] || mkdir files
 answer="n"
-if [ -f files/busybox ] ; then
+if [ -f files/busybox/busybox ] ; then
   printf "** Do you want to use a BusyBox downloaded earlier? (y/n): "
   read answer
 fi
 if [ $answer != "y" ] ; then
   echo "** BusyBox installation"
-  apt update && apt install -y ca-certificates wget
-  rm files/busybox > /dev/null 2>&1
-  wget $busybox -O files/busybox
-  chmod +x files/busybox
+
+  apt update && apt install -y ca-certificates wget build-essential\
+      libncurses5 libncurses5-dev bison flex libelf-dev chrpath gawk\
+      texinfo libsdl1.2-dev whiptail diffstat cpio libssl-dev bc
+
+  cd files/
+  rm -r busybox* > /dev/null 2>&1
+  wget $busybox -O busybox.tar.bz2
+  tar -xf busybox.tar.bz2
+  rm *.tar.bz2
+  mv busybox* busybox
+  cd busybox
+  make defconfig
+
+  # BusyBox configuration ------
+  sed 's/^.*CONFIG_STATIC.*$/CONFIG_STATIC=y/' -i .config
+  sed 's/^CONFIG_MAN=y/CONFIG_MAN=n/' -i .config
+  echo "CONFIG_STATIC_LIBGCC=y" >> .config
+
+  make
+  cd ../../
 fi
 
-echo "** Partitioning /dev/$device" && sleep 5
+
+echo "** Partitioning /dev/$device" && sleep 2
 part=1
-swap_uuid=0
+lba=2048
 wipefs -af /dev/$device > /dev/null 2>&1
-if [ $swap_size -gt 0 ] ; then
-  echo "** Preparation of the swap partition"
-  part=2
-  printf "n\np\n1\n\n+${swap_size}M\nt\n82\nw\n" | ./files/busybox fdisk /dev/$device > /dev/null 2>&1
-  mkswap /dev/${device}1
-  swap_uuid=$(blkid /dev/${device}1 -sUUID -ovalue)
-  sleep 1  
-fi
-echo "** Preparation of the system partition"
-printf "n\np\n${part}\n\n\nw\n" | ./files/busybox fdisk /dev/$device > /dev/null 2>&1
-echo "Y" | mkfs.ext4 /dev/${device}${part}
+  echo "** Preparation of the system partition"
+  printf "n\np\n${part}\n2048\n\nw\n" | \
+	 ./files/busybox/busybox fdisk /dev/$device > /dev/null 2>&1
+
+echo y | mkfs.ext4 /dev/${device}${part}
 uuid=$(blkid /dev/${device}${part} -sUUID -ovalue)
+
+
 mount /dev/${device}${part} /mnt
 mkdir /mnt/boot
 host=$(printf $(printf $distro_name | tr A-Z a-z) | cut -d" " -f 1)
@@ -79,9 +91,6 @@ if [ -f files/linux/arch/$arch/boot/bzImage ] ; then
   read answer
 fi
 if [ $answer != "y" ] ; then
-  apt install -y build-essential libncurses5 libncurses5-dev \
-      bison flex libelf-dev chrpath gawk texinfo libsdl1.2-dev whiptail \
-      diffstat cpio libssl-dev bc
   cd files
   rm -r linux* > /dev/null 2>&1
   wget $kernel 
@@ -90,6 +99,11 @@ if [ $answer != "y" ] ; then
   mv linux* linux
   cd linux
   make defconfig
+
+  # Linux Kernel configuration -----
+  sed "s/Debian/$distro_name/" -i .config
+  # --------------------------------
+
   make
   cd ../../
 fi
@@ -109,7 +123,7 @@ boot
 echo Loading Linux
 }" > /mnt/boot/grub/grub.cfg
 
-# creation of necessary catalogues
+# creation of necessary directories
 mkdir rootfs
 cd rootfs
 mkdir -p bin dev lib lib64 run mnt/root proc sbin sys usr/bin \
@@ -120,9 +134,14 @@ mkdir -p bin dev lib lib64 run mnt/root proc sbin sys usr/bin \
          etc/cron/daily etc/cron/hourly etc/cron/monthly etc/cron/weekly
 
 # installation of the BusyBox
-cp ../files/busybox bin
+cp ../files/busybox/busybox bin
 install -d -m 0750 root
 install -d -m 1777 tmp
+
+# DNS libs
+for i in $(find /lib/ | grep 'ld-2\|ld-lin\|libc.so\|libnss_dns\|libresolv'); do
+    cp ${i} lib
+done
 
 echo "** System configuration"
 mknod dev/console c 5 1
@@ -133,25 +152,36 @@ echo "root:mKhhqXFCdhNiA:17743::::::" > etc/shadow
 echo "root:x:0:root\nservice:x:1:service" > etc/group
 echo "/bin/sh" > etc/shells
 echo "127.0.0.1	 localhost $host" > etc/hosts
-echo "<html><h1>It Works!!</h1></html>" > var/www/html/index.html
-echo "UUID=$uuid  /  ext4  defaults,errors=remount-ro  0  1" > etc/fstab
-[ $swap_size -gt 0 ] && echo "UUID=$swap_uuid  none  swap  sw  0  0" >> etc/fstab
 
-# path, prompt and aliases
+# Default httpd page
+cat << EOF > var/www/html/index.html
+<!DOCTYPE html><html lang="en"><head><title>$distro_name httpd default page: It works</title>
+<style>body{background-color:#004c75;}h1,p{margin-top:60px;color:#d4d4d4;
+text-align:center;font-family:Arial}</style></head><body><h1>It works!</h1><hr>
+<p><b>$distro_name httpd</b> default page<br>ver. $distro_version</p></body></html>
+EOF
+
+# fstab
+echo "UUID=$uuid  /  ext4  defaults,errors=remount-ro  0  1" > etc/fstab
+
+# Path, prompt and aliases
 cat << EOF > etc/profile
 uname -snrvm
+echo
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin
-PS1="\\u@\\h:\\w\\$ "
-[ \$(id -u) -eq 0 ] && PS1="\\u@\\h:\\w# "
+export PS1="\\e[0;32m\\u@\\h:\\w\\\$ \\e[m"
+[ \$(id -u) -eq 0 ] && export PS1="\\u@\\h:\\w# "
 alias vim=vi
 alias su="su -l"
+alias exit="clear;exit"
+alias logout="clear;logout"
 alias locate=which
 alias whereis=which
 alias logout=exit
 EOF
 
 # banner
-printf "\n$distro_name Linux $distro_version - $distro_desc\n\n" | tee -a etc/issue usr/share/infoban >/dev/null
+printf "\n\e[96m${*}$distro_name\e[0m${*} Linux \e[97m${*}$distro_version\e[0m${*} - $distro_desc\n\n" | tee -a etc/issue usr/share/infoban >/dev/null
 cat << EOF >> etc/issue
  * Default root password:        Yosild
  * Networking:                   ifupdown
@@ -163,12 +193,23 @@ echo "cp /usr/share/infoban /etc/issue" > sbin/disban
 
 # legal
 cat << EOF > etc/motd
-The programs included with the $distro_name Linux system are free software;
-the exact distribution terms for each program are described in the
-individual files in /usr/share/doc/*/copyright.
 
+The programs included with the $distro_name Linux system are free software.
 $distro_name Linux comes with ABSOLUTELY NO WARRANTY, to the extent
 permitted by applicable law.
+
+EOF
+
+cat << EOF > etc/os-release
+PRETTY_NAME="$distro_name - $distro_desc ($distro_codename)"
+NAME="$distro_name"
+VERSION_ID="$distro_version"
+VERSION="$distro_version"
+VERSION_CODENAME="$distro_codename"
+ID="$distro_name"
+HOME_URL="https://github.com/jaromaz/yosild"
+SUPPORT_URL="https://jm.iq.pl/yosild"
+BUG_REPORT_URL="https://github.com/jaromaz/yosild/issues"
 EOF
 
 # inittab
@@ -395,3 +436,5 @@ chmod 400 /mnt/boot/$initrd_file
 rm -r rootfs
 umount /mnt
 printf "\n** all done **\n\n"
+
+
