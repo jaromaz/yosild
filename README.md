@@ -7,9 +7,9 @@ minimalistic Linux system for devices with little hardware resources. Yosild Lin
 needs just **64 MB RAM** and **36 MB storage size**. *yosild.sh* requires [minimal][1]
 *Debian* or *Ubuntu* distro to run with the architecture compatible with the target device.
 
-The script works with VirtualBox or KVM/QEMU - you can create an additional virtual hard
-drive and install Yosild Linux on it, and then connect this virtual disk to a new virtual
-machine - just like in my [YouTube video][3]:
+The script works with VirtualBox or KVM/QEMU (all drive types except VirtIO) - you can
+create an additional virtual hard drive and install Yosild Linux on it, and then connect
+this virtual disk to a new virtual machine - just like in my [YouTube video][3]:
 <p align="center"><a href="https://www.youtube.com/watch?v=BPXxPZBBeJ0" target="_blank"><img src="https://jm.iq.pl/yosild/yosild_mov2.jpg" width="50%"></a></p>
 
 Yosild creates probably the simplest, complete version of Linux, which makes it easier
