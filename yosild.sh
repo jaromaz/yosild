@@ -1,13 +1,13 @@
 #!/bin/sh
 
-# -----------------------------------
-# Yosild - Your simple Linux distro
+# -------------------------------------
+# Yosild 3.1 - Your simple Linux distro
 # (c) Jaromaz https://jm.iq.pl
 # Yosild is licensed under
 # GNU General Public License v3.0
-# -----------------------------------
+# -------------------------------------
 
-# ----- Config ----------------------
+# ----- Config ------------------------
 device="vdb"
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
@@ -16,7 +16,7 @@ distro_codename="chinchilla"
 telnetd="true"
 kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.14.15.tar.xz"
 busybox="https://busybox.net/downloads/busybox-1.34.1.tar.bz2"
-# -----------------------------------
+# -------------------------------------
 
 if [ $(id -u) -ne 0 ]; then
   echo "Run as root"; exit 1
@@ -37,7 +37,7 @@ fi
 [ -d ./files ] || mkdir files
 answer="n"
 if [ -f files/busybox/busybox ] ; then
-  printf "** Do you want to use a BusyBox downloaded earlier? (y/n): "
+  printf "** Do you want to use a previously compiled BusyBox? (y/n): "
   read answer
 fi
 if [ $answer != "y" ] ; then
@@ -87,7 +87,7 @@ arch=$(uname -m)
 [ $arch = 'i686' ] && arch="i386"
 answer="n"
 if [ -f files/linux/arch/$arch/boot/bzImage ] ; then
-  printf "** Do You want to use a kernel compiled earlier? (y/n): "
+  printf "** Do you want to use a previously compiled kernel? (y/n): "
   read answer
 fi
 if [ $answer != "y" ] ; then
