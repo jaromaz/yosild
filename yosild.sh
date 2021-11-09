@@ -1,22 +1,22 @@
 #!/bin/sh
 
-# -------------------------------------
-# Yosild 3.1 - Your simple Linux distro
+# ---------------------------------------
+# Yosild 3.1.2 - Your simple Linux distro
 # (c) Jaromaz https://jm.iq.pl
 # Yosild is licensed under
 # GNU General Public License v3.0
-# -------------------------------------
+# ---------------------------------------
 
-# ----- Config ------------------------
+# ----- Config --------------------------
 device="vdb"
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
-distro_version="3.1"
+distro_version="3.1.2"
 distro_codename="chinchilla"
 telnetd="true"
-kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.14.15.tar.xz"
+kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.1.tar.xz"
 busybox="https://busybox.net/downloads/busybox-1.34.1.tar.bz2"
-# -------------------------------------
+# ---------------------------------------
 
 if [ $(id -u) -ne 0 ]; then
   echo "Run as root"; exit 1

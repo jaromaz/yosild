@@ -1,23 +1,25 @@
 # Yosild - Your simple Linux distro
 
 Yosild is a single shell script that builds a full, minimal Linux distribution,
-based on BusyBox. It compiles the **latest stable kernel** (5.14.15) and the
+based on BusyBox. It compiles the **latest stable kernel** (5.15.1) and the
 **latest stable version of the BusyBox** (1.34.1). This script can prepare
 minimalistic Linux system for devices with little hardware resources. Yosild Linux
-needs just **64 MB RAM** and **36 MB storage size**. *yosild.sh* requires [minimal][1]
-*Debian* or *Ubuntu* distro to run with the architecture compatible with the target device.
+needs just **64 MB RAM** and **36 MB storage size**. *yosild.sh* requires
+[minimal][1] *Debian* or *Ubuntu* distro to run with the architecture compatible
+with the target device.
 
-The script works with VirtualBox or KVM/QEMU (all drive types except VirtIO) - you can
-create an additional virtual hard drive and install Yosild Linux on it, and then connect
-this virtual disk to a new virtual machine - just like in my [YouTube video][3]:
+The script works with VirtualBox or KVM/QEMU (all drive types except VirtIO) - you
+can create an additional virtual hard drive and install Yosild Linux on it, and
+then connect this virtual disk to a new virtual machine - just like in my
+[YouTube video][3]:
 <p align="center"><a href="https://www.youtube.com/watch?v=BPXxPZBBeJ0" target="_blank"><img src="https://jm.iq.pl/yosild/yosild_mov2.jpg" width="50%"></a></p>
 
-Yosild creates probably the simplest, complete version of Linux, which makes it easier
-to understand, how to build the system from scratch. It is much easier to build
-than other, previously available solutions: Aboriginal, mkroot, Buildroot or Linux
-From Scratch - just specify the target drive (virtual or flash drive) inside the
-*yosild.sh* script and simply run the script. You can also rename the system to make
-it your distribution.
+Yosild creates probably the simplest, complete version of Linux, which makes it
+easier to understand, how to build the system from scratch. It is much easier to
+build than other, previously available solutions: Aboriginal, mkroot, Buildroot or
+Linux From Scratch - just specify the target drive (virtual or flash drive) inside
+the *yosild.sh* script and simply run the script. You can also rename the system
+to make it your distribution.
 
 
 **Yosild**:
