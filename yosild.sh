@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ---------------------------------------
-# Yosild 3.1.3 - Your simple Linux distro
+# Yosild 3.1.4 - Your simple Linux distro
 # (c) Jaromaz https://jm.iq.pl
 # Yosild is licensed under
 # GNU General Public License v3.0
@@ -11,10 +11,10 @@
 device="sdc"
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
-distro_version="3.1.3"
+distro_version="3.1.4"
 distro_codename="chinchilla"
 telnetd="true"
-kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.11.tar.xz"
+kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.13.tar.xz"
 busybox="https://busybox.net/downloads/busybox-1.34.1.tar.bz2"
 # ---------------------------------------
 
