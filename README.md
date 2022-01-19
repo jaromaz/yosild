@@ -1,7 +1,7 @@
 # Yosild - Your simple Linux distro
 
 Yosild is a single shell script that builds a full, minimal Linux distribution,
-based on BusyBox. It compiles the **latest stable kernel** (5.15.13) and the
+based on BusyBox. It compiles the **latest stable kernel** (5.16.1) and the
 **latest stable version of the BusyBox** (1.34.1). This script can prepare
 minimalistic Linux system for devices with little hardware resources. Yosild Linux
 needs just **64 MB RAM** and **36 MB storage size**. *yosild.sh* requires
