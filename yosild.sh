@@ -8,7 +8,7 @@
 # ---------------------------------------
 
 # ----- Config --------------------------
-device="sda"
+device="sdc"
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
 distro_version="3.1.5"
