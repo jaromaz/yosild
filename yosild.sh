@@ -1,6 +1,4 @@
 #!/bin/sh
-# logrotate fix
-
 # ---------------------------------------
 # Yosild 3.1.6 - Your simple Linux distro
 # (c) Jaromaz https://jm.iq.pl
@@ -176,11 +174,11 @@ alias vim=vi
 alias l.='ls -d .*'
 alias ll='ls -Al'
 alias su='su -l'
+alias logout='clear;exit'
 alias exit='clear;exit'
-alias logout='clear;logout'
 alias locate=which
 alias whereis=which
-alias logout=exit
+alias useradd=adduser
 EOF
 
 # banner
@@ -333,7 +331,7 @@ for log in \$(ls -1 \${dir} | grep -Ev '\.gz$'); do
   fi
 done
 EOF
-ln usr/sbin/logrotate etc/cron/daily/logrotate
+ln -s ../../../usr/sbin/logrotate etc/cron/daily/logrotate
 
 # init scripts installer
 cat << EOF > usr/bin/add-rc.d
@@ -428,7 +426,7 @@ chmod 664  var/log/lastlog var/log/wtmp
 chmod 4755 bin/busybox
 chmod 600  var/spool/cron/crontabs/root
 chmod 755  usr/sbin/nologin sbin/disban init sbin/man etc/init.d/rcS\
-           etc/cron/daily/logrotate usr/bin/add-rc.d sbin/halt\
+           usr/sbin/logrotate usr/bin/add-rc.d sbin/halt\
            usr/share/udhcpc/default.script 
 chmod 644  etc/passwd etc/group etc/hostname etc/shells etc/hosts etc/fstab\
            etc/issue etc/motd etc/network/interfaces etc/profile
