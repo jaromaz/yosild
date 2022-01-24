@@ -1,7 +1,8 @@
 #!/bin/sh
+# logrotate fix
 
 # ---------------------------------------
-# Yosild 3.1.5 - Your simple Linux distro
+# Yosild 3.1.6 - Your simple Linux distro
 # (c) Jaromaz https://jm.iq.pl
 # Yosild is licensed under
 # GNU General Public License v3.0
@@ -11,10 +12,10 @@
 device="sdc"
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
-distro_version="3.1.5"
+distro_version="3.1.6"
 distro_codename="chinchilla"
 telnetd="true"
-kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.16.1.tar.xz"
+kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.16.2.tar.xz"
 busybox="https://busybox.net/downloads/busybox-1.34.1.tar.bz2"
 # ---------------------------------------
 
@@ -172,9 +173,11 @@ export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin
 export PS1="\\e[0;32m\\u@\\h:\\w\\\$ \\e[m"
 [ \$(id -u) -eq 0 ] && export PS1="\\u@\\h:\\w# "
 alias vim=vi
-alias su="su -l"
-alias exit="clear;exit"
-alias logout="clear;logout"
+alias l.='ls -d .*'
+alias ll='ls -Al'
+alias su='su -l'
+alias exit='clear;exit'
+alias logout='clear;logout'
 alias locate=which
 alias whereis=which
 alias logout=exit
@@ -316,11 +319,11 @@ cat << EOF > var/spool/cron/crontabs/root
 EOF
 
 # logrotate
-cat << EOF > etc/cron/daily/logrotate
+cat << EOF > usr/sbin/logrotate
 #!/bin/sh 
 maxsize=512
 dir=/var/log
-for log in messages lastlog; do
+for log in \$(ls -1 \${dir} | grep -Ev '\.gz$'); do
   size=\$(du "\$dir/\$log" | tr -s '\t' ' ' | cut -d' ' -f1)
   if [ "\$size" -gt "\$maxsize" ] ; then
     tsp=\$(date +%s)
@@ -330,6 +333,7 @@ for log in messages lastlog; do
   fi
 done
 EOF
+ln usr/sbin/logrotate etc/cron/daily/logrotate
 
 # init scripts installer
 cat << EOF > usr/bin/add-rc.d
@@ -436,5 +440,4 @@ chmod 400 /mnt/boot/$initrd_file
 rm -r rootfs
 umount /mnt
 printf "\n** all done **\n\n"
-
 
