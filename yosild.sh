@@ -1,6 +1,6 @@
 #!/bin/sh
 # ---------------------------------------
-# Yosild 3.1.6 - Your simple Linux distro
+# Yosild 3.1.7 - Your simple Linux distro
 # (c) Jaromaz https://jm.iq.pl
 # Yosild is licensed under
 # GNU General Public License v3.0
@@ -10,10 +10,10 @@
 device="sdc"
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
-distro_version="3.1.6"
+distro_version="3.1.7"
 distro_codename="chinchilla"
 telnetd="true"
-kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.16.2.tar.xz"
+kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.16.10.tar.xz"
 busybox="https://busybox.net/downloads/busybox-1.34.1.tar.bz2"
 # ---------------------------------------
 
@@ -97,12 +97,31 @@ if [ $answer != "y" ] ; then
   rm linux-*.tar.xz
   mv linux* linux
   cd linux
+
+# Linux Kernel configuration -------------------------------
+#  sed -i "s/CONFIG_SYSVIPC=y/CONFIG_SYSVIPC=n/g" 
+
+cat <<EOF >> arch/x86/configs/x86_64_defconfig
+CONFIG_HYPERVISOR_GUEST=y
+CONFIG_PARAVIRT=y
+CONFIG_PARAVIRT_SPINLOCKS=y
+CONFIG_CONNECTOR=y
+CONFIG_SCSI_FC_ATTRS=y
+CONFIG_HYPERV=y
+CONFIG_HYPERV_UTILS=y
+CONFIG_HYPERV_BALLOON=y
+CONFIG_HYPERV_STORAGE=y
+CONFIG_HYPERV_NET=y
+CONFIG_HYPERV_KEYBOARD=y
+CONFIG_FB_HYPERV=y
+CONFIG_HID_HYPERV_MOUSE=y
+CONFIG_PCI_HYPERV=y
+CONFIG_VSOCKETS=y
+CONFIG_HYPERV_VSOCKETS=y
+EOF
+# ----------------------------------------------------------
+
   make defconfig
-
-  # Linux Kernel configuration -----
-  sed "s/Debian/$distro_name/" -i .config
-  # --------------------------------
-
   make
   cd ../../
 fi
@@ -438,4 +457,5 @@ chmod 400 /mnt/boot/$initrd_file
 rm -r rootfs
 umount /mnt
 printf "\n** all done **\n\n"
+
 
