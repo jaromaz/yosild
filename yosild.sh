@@ -1,19 +1,20 @@
 #!/bin/sh
 # ---------------------------------------
-# Yosild 3.1.6 - Your simple Linux distro
+# Yosild - Your simple Linux distro
+  version="3.2.1"
 # (c) Jaromaz https://jm.iq.pl
 # Yosild is licensed under
 # GNU General Public License v3.0
 # ---------------------------------------
 
 # ----- Config --------------------------
-device="sdc"
+device="sda"
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
-distro_version="3.1.6"
 distro_codename="chinchilla"
-telnetd="true"
-kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.16.2.tar.xz"
+telnetd_enabled="true"
+hyperv_support="true"
+kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.16.14.tar.xz"
 busybox="https://busybox.net/downloads/busybox-1.34.1.tar.bz2"
 # ---------------------------------------
 
@@ -97,12 +98,31 @@ if [ $answer != "y" ] ; then
   rm linux-*.tar.xz
   mv linux* linux
   cd linux
+
+# Linux Kernel configuration -------------------------------
+if [ "$hyperv_support" == "true" ]; then
+cat <<EOF >> arch/x86/configs/x86_64_defconfig
+CONFIG_HYPERVISOR_GUEST=y
+CONFIG_PARAVIRT=y
+CONFIG_PARAVIRT_SPINLOCKS=y
+CONFIG_CONNECTOR=y
+CONFIG_SCSI_FC_ATTRS=y
+CONFIG_HYPERV=y
+CONFIG_HYPERV_UTILS=y
+CONFIG_HYPERV_BALLOON=y
+CONFIG_HYPERV_STORAGE=y
+CONFIG_HYPERV_NET=y
+#CONFIG_HYPERV_KEYBOARD=y
+#CONFIG_FB_HYPERV=y
+#CONFIG_HID_HYPERV_MOUSE=y
+#CONFIG_PCI_HYPERV=y
+#CONFIG_VSOCKETS=y
+#CONFIG_HYPERV_VSOCKETS=y
+EOF
+fi
+# ----------------------------------------------------------
+
   make defconfig
-
-  # Linux Kernel configuration -----
-  sed "s/Debian/$distro_name/" -i .config
-  # --------------------------------
-
   make
   cd ../../
 fi
@@ -157,7 +177,7 @@ cat << EOF > var/www/html/index.html
 <!DOCTYPE html><html lang="en"><head><title>$distro_name httpd default page: It works</title>
 <style>body{background-color:#004c75;}h1,p{margin-top:60px;color:#d4d4d4;
 text-align:center;font-family:Arial}</style></head><body><h1>It works!</h1><hr>
-<p><b>$distro_name httpd</b> default page<br>ver. $distro_version</p></body></html>
+<p><b>$distro_name httpd</b> default page<br>ver. $version</p></body></html>
 EOF
 
 # fstab
@@ -182,7 +202,7 @@ alias useradd=adduser
 EOF
 
 # banner
-printf "\n\e[96m${*}$distro_name\e[0m${*} Linux \e[97m${*}$distro_version\e[0m${*} - $distro_desc\n\n" | tee -a etc/issue usr/share/infoban >/dev/null
+printf "\n\e[96m${*}$distro_name\e[0m${*} Linux \e[97m${*}$version\e[0m${*} - $distro_desc\n\n" | tee -a etc/issue usr/share/infoban >/dev/null
 cat << EOF >> etc/issue
  * Default root password:        Yosild
  * Networking:                   ifupdown
@@ -204,8 +224,8 @@ EOF
 cat << EOF > etc/os-release
 PRETTY_NAME="$distro_name - $distro_desc ($distro_codename)"
 NAME="$distro_name"
-VERSION_ID="$distro_version"
-VERSION="$distro_version"
+VERSION_ID="$version"
+VERSION="$version"
 VERSION_CODENAME="$distro_codename"
 ID="$distro_name"
 HOME_URL="https://github.com/jaromaz/yosild"
@@ -383,7 +403,7 @@ PIDFILE=/var/run/$1.pid
 init \$@
 EOF
 chmod 744 etc/init.d/$1
-[ $1 = 'telnetd' ] && [ "$telnetd" = false ] && continue;
+[ $1 = 'telnetd' ] && [ "$telnetd_enabled" = false ] && continue;
 [ "$3" ] && ln -s ../init.d/$1 etc/rc.d/$3$1.sh
 done
 
@@ -438,4 +458,5 @@ chmod 400 /mnt/boot/$initrd_file
 rm -r rootfs
 umount /mnt
 printf "\n** all done **\n\n"
+
 
