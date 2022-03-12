@@ -8,19 +8,18 @@ needs just **70 MB RAM** and **40 MB storage size**. *yosild.sh* requires
 [minimal][1] *Debian* or *Ubuntu* distro to run with the architecture compatible
 with the target device.
 
-The script works with VirtualBox, KVM/QEMU (all drive types except VirtIO) and
-Hyper-V - you can create an additional virtual hard drive and install Yosild Linux
+The script works with VirtualBox, Hyper-V and KVM/QEMU (all drive types except
+VirtIO) - you can create an additional virtual hard drive and install Yosild Linux
 on it, and then connect this virtual disk to a new virtual machine - just like in
 my [YouTube video][3]:
 <p align="center"><a href="https://www.youtube.com/watch?v=BPXxPZBBeJ0" target="_blank"><img src="https://jm.iq.pl/yosild/yosild_mov2.jpg" width="50%"></a></p>
 
 Yosild creates probably the simplest, complete version of Linux, which makes it
-easier to understand, how to build the system from scratch. It is much easier to
-build than other, previously available solutions: Aboriginal, mkroot, Buildroot or
-Linux From Scratch - just specify the target drive (virtual or flash drive) inside
-the *yosild.sh* script and simply run the script. You can also rename the system
-to make it your distribution.
-
+easier to understand, how to build the system from scratch and how to use it. 
+Yosild is much easier to build than other, previously available solutions:
+Aboriginal, mkroot, Buildroot or Linux From Scratch. Just specify the target
+drive (virtual or flash drive) inside the *yosild.sh* script and simply run the
+script. You can also rename the system to make it your distribution.
 
 **Yosild**:
 

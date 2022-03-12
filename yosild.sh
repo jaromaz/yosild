@@ -1,7 +1,7 @@
 #!/bin/sh
 # ---------------------------------------
 # Yosild - Your simple Linux distro
-  version="3.2.1"
+  version="3.2.1.B2"
 # (c) Jaromaz https://jm.iq.pl
 # Yosild is licensed under
 # GNU General Public License v3.0
@@ -99,25 +99,14 @@ if [ $answer != "y" ] ; then
   mv linux* linux
   cd linux
 
-# Linux Kernel configuration -------------------------------
-if [ "$hyperv_support" == "true" ]; then
+# Linux Kernel config --------------------------------------
+if [ "$hyperv_support" = "true" ]; then
 cat <<EOF >> arch/x86/configs/x86_64_defconfig
 CONFIG_HYPERVISOR_GUEST=y
 CONFIG_PARAVIRT=y
-CONFIG_PARAVIRT_SPINLOCKS=y
 CONFIG_CONNECTOR=y
-CONFIG_SCSI_FC_ATTRS=y
 CONFIG_HYPERV=y
-CONFIG_HYPERV_UTILS=y
-CONFIG_HYPERV_BALLOON=y
-CONFIG_HYPERV_STORAGE=y
 CONFIG_HYPERV_NET=y
-#CONFIG_HYPERV_KEYBOARD=y
-#CONFIG_FB_HYPERV=y
-#CONFIG_HID_HYPERV_MOUSE=y
-#CONFIG_PCI_HYPERV=y
-#CONFIG_VSOCKETS=y
-#CONFIG_HYPERV_VSOCKETS=y
 EOF
 fi
 # ----------------------------------------------------------
