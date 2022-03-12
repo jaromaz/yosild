@@ -1,19 +1,19 @@
 #!/bin/sh
 # ---------------------------------------
 # Yosild - Your simple Linux distro
-  version="3.2.1.B2"
+  version="3.2.1"
 # (c) Jaromaz https://jm.iq.pl
 # Yosild is licensed under
 # GNU General Public License v3.0
 # ---------------------------------------
 
 # ----- Config --------------------------
-device="sda"
+device="sdc"
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
 distro_codename="chinchilla"
 telnetd_enabled="true"
-hyperv_support="true"
+hyperv_support="false"
 kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.16.14.tar.xz"
 busybox="https://busybox.net/downloads/busybox-1.34.1.tar.bz2"
 # ---------------------------------------
@@ -56,11 +56,11 @@ if [ $answer != "y" ] ; then
   cd busybox
   make defconfig
 
-  # BusyBox configuration ------
+  # BusyBox configuration --------------------------------
   sed 's/^.*CONFIG_STATIC.*$/CONFIG_STATIC=y/' -i .config
   sed 's/^CONFIG_MAN=y/CONFIG_MAN=n/' -i .config
   echo "CONFIG_STATIC_LIBGCC=y" >> .config
-
+  # ------------------------------------------------------
   make
   cd ../../
 fi
@@ -98,6 +98,7 @@ if [ $answer != "y" ] ; then
   rm linux-*.tar.xz
   mv linux* linux
   cd linux
+
 
 # Linux Kernel config --------------------------------------
 if [ "$hyperv_support" = "true" ]; then
