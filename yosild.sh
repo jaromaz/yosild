@@ -8,12 +8,12 @@
 # ---------------------------------------
 
 # ----- Config --------------------------
-device="sda"
+device="sdc"
 distro_name="Yosild"
 distro_desc="Your simple Linux distro"
 distro_codename="chinchilla"
 telnetd_enabled="true"
-hyperv_support="true"
+hyperv_support="false"
 kernel="https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.16.19.tar.xz"
 busybox="https://busybox.net/downloads/busybox-1.34.1.tar.bz2"
 # ---------------------------------------
