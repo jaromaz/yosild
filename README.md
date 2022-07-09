@@ -41,15 +41,16 @@ httpd, ftpd, syslogd and prepared boot script for telnetd. After installation on
 a flash drive, the distribution can be run on any computer compatible with the
 architecture on which the kernel was compiled.
 
+Yosild is licensed under GNU General Public License v3.0.
+
+For more information please visit my website: [https://jm.iq.pl/yosild][2]
+
 ### Support
 
 You can transfer any funds you wish to my
 *[PayPal account](https://www.paypal.com/paypalme/jaromaz)* if you want to
 support this project.
 
-Yosild is licensed under GNU General Public License v3.0.
-
-For more information please visit my website: [https://jm.iq.pl/yosild][2]
 
 [1]: https://www.debian.org/CD/netinst/
 [2]: https://jm.iq.pl/yosild
